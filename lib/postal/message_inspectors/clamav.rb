@@ -16,8 +16,8 @@ module Postal
           data = tcp_socket.read
         end
 
-        if data && data =~ /\Astream\:\s+(.*?)[\s\0]+?/
-          if $1.upcase == 'OK'
+        if data && data =~ /\Astream:\s+(.*?)[\s\0]+?/
+          if $1.upcase == "OK"
             inspection.threat = false
             inspection.threat_message = "No threats found"
           else
@@ -33,7 +33,7 @@ module Postal
         inspection.threat_message = "Timed out scanning for threats"
       rescue => e
         logger.error "Error talking to clamav: #{e.class} (#{e.message})"
-        logger.error e.backtrace[0,5]
+        logger.error e.backtrace[0, 5]
         inspection.threat = false
         inspection.threat_message = "Error when scanning for threats"
       ensure

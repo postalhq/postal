@@ -15,7 +15,7 @@ module Postal
       Signal.trap("TERM") { @exit = true; set_process_name }
 
       self.class.job_channel.prefetch(Postal.config.workers.threads)
-      @initial_queues.each { |queue | join_queue(queue) }
+      @initial_queues.each { |queue| join_queue(queue) }
 
       exit_checks = 0
       loop do
@@ -41,17 +41,17 @@ module Postal
 
     private
 
-    def receive_job(delivery_info, properties, body)
+    def receive_job(delivery_info, _properties, body)
       begin
         message = JSON.parse(body) rescue nil
-        if message && message['class_name']
-          @running_jobs << message['id']
+        if message && message["class_name"]
+          @running_jobs << message["id"]
           set_process_name
           start_time = Time.now
-          Thread.current[:job_id] = message['id']
+          Thread.current[:job_id] = message["id"]
           logger.info "[#{message['id']}] Started processing \e[34m#{message['class_name']}\e[0m job"
           begin
-            klass = message['class_name'].constantize.new(message['id'], message['params'])
+            klass = message["class_name"].constantize.new(message["id"], message["params"])
             klass.perform
             GC.start
           rescue => e
@@ -61,7 +61,7 @@ module Postal
               logger.warn "[#{message['id']}]    " + line
             end
             if defined?(Raven)
-              Raven.capture_exception(e, :extra => {:job_id => message['id']})
+              Raven.capture_exception(e, extra: { job_id: message["id"] })
             end
           ensure
             logger.info "[#{message['id']}] Finished processing \e[34m#{message['class_name']}\e[0m job in #{Time.now - start_time}s"
@@ -70,7 +70,7 @@ module Postal
       ensure
         Thread.current[:job_id] = nil
         self.class.job_channel.ack(delivery_info.delivery_tag)
-        @running_jobs.delete(message['id']) if message['id']
+        @running_jobs.delete(message["id"]) if message["id"]
         set_process_name
 
         if @exit && @running_jobs.empty?
@@ -84,7 +84,7 @@ module Postal
       if @active_queues[queue]
         logger.info "Attempted to join queue #{queue} but already joined."
       else
-        consumer = self.class.job_queue(queue).subscribe(:manual_ack => true) do |delivery_info, properties, body|
+        consumer = self.class.job_queue(queue).subscribe(manual_ack: true) do |delivery_info, properties, body|
           receive_job(delivery_info, properties, body)
         end
         @active_queues[queue] = consumer
@@ -187,23 +187,27 @@ module Postal
       self.class.logger
     end
 
-    def self.logger
-      Postal.logger_for(:worker)
-    end
+    class << self
 
-    def self.job_channel
-      @channel ||= Postal::RabbitMQ.create_channel
-    end
-
-    def self.job_queue(name)
-      @job_queues ||= {}
-      @job_queues[name] ||= begin
-        job_channel.queue("deliver-jobs-#{name}", :durable => true, :arguments => {'x-message-ttl' => 60000})
+      def logger
+        Postal.logger_for(:worker)
       end
-    end
 
-    def self.local_ip?(ip)
-      !!(ip =~ /\A(127\.|fe80:|::)/)
+      def job_channel
+        @job_channel ||= Postal::RabbitMQ.create_channel
+      end
+
+      def job_queue(name)
+        @job_queues ||= {}
+        @job_queues[name] ||= begin
+          job_channel.queue("deliver-jobs-#{name}", durable: true, arguments: { "x-message-ttl" => 60_000 })
+        end
+      end
+
+      def local_ip?(ip)
+        !!(ip =~ /\A(127\.|fe80:|::)/)
+      end
+
     end
 
   end

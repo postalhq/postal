@@ -1,7 +1,6 @@
-require 'rails_helper'
+require "rails_helper"
 
 describe Server do
-
   context "model" do
     subject(:server) { create(:server) }
 
@@ -10,5 +9,4 @@ describe Server do
       expect(server.uuid.length).to eq 36
     end
   end
-
 end

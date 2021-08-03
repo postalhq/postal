@@ -1,5 +1,5 @@
-require 'ipaddr'
-require 'nio'
+require "ipaddr"
+require "nio"
 
 module Postal
   module SMTPServer
@@ -16,21 +16,20 @@ module Postal
         BasicSocket.do_not_reverse_lookup = true
 
         trap("USR1") do
-          STDOUT.puts "Received USR1 signal, respawning."
+          $stdout.puts "Received USR1 signal, respawning."
           fork do
-            if ENV['APP_ROOT']
-              Dir.chdir(ENV['APP_ROOT'])
+            if ENV["APP_ROOT"]
+              Dir.chdir(ENV["APP_ROOT"])
             end
-            ENV.delete('BUNDLE_GEMFILE')
-            exec("bundle exec --keep-file-descriptors rake postal:smtp_server", :close_others => false)
+            ENV.delete("BUNDLE_GEMFILE")
+            exec("bundle exec --keep-file-descriptors rake postal:smtp_server", close_others: false)
           end
         end
 
         trap("TERM") do
-          STDOUT.puts "Received TERM signal, shutting down."
+          $stdout.puts "Received TERM signal, shutting down."
           unlisten
         end
-
       end
 
       def ssl_context
@@ -38,7 +37,7 @@ module Postal
           ssl_context      = OpenSSL::SSL::SSLContext.new
           ssl_context.cert = Postal.smtp_certificates[0]
           ssl_context.extra_chain_cert = Postal.smtp_certificates[1..-1]
-          ssl_context.key  = Postal.smtp_private_key
+          ssl_context.key = Postal.smtp_private_key
           ssl_context.ssl_version = Postal.config.smtp_server.ssl_version if Postal.config.smtp_server.ssl_version
           ssl_context.ciphers = Postal.config.smtp_server.tls_ciphers if Postal.config.smtp_server.tls_ciphers
           ssl_context
@@ -46,8 +45,8 @@ module Postal
       end
 
       def listen
-        if ENV['SERVER_FD']
-          @server = TCPServer.for_fd(ENV['SERVER_FD'].to_i)
+        if ENV["SERVER_FD"]
+          @server = TCPServer.for_fd(ENV["SERVER_FD"].to_i)
         else
           @server = TCPServer.open(Postal.config.smtp_server.bind_address, Postal.config.smtp_server.port)
         end
@@ -61,7 +60,7 @@ module Postal
           @server.setsockopt(Socket::SOL_TCP, Socket::TCP_KEEPINTVL, 10)
           @server.setsockopt(Socket::SOL_TCP, Socket::TCP_KEEPCNT, 5)
         end
-        ENV['SERVER_FD'] = @server.to_i.to_s
+        ENV["SERVER_FD"] = @server.to_i.to_s
         logger.info "Listening on  #{Postal.config.smtp_server.bind_address}:#{Postal.config.smtp_server.port}"
       end
 
@@ -72,7 +71,7 @@ module Postal
       end
 
       def kill_parent
-        Process.kill('TERM', Process.ppid)
+        Process.kill("TERM", Process.ppid)
       end
 
       def run_event_loop
@@ -81,7 +80,7 @@ module Postal
         # Register the SMTP listener
         @io_selector.register(@server, :r)
         # Create a hash to contain a buffer for each client.
-        buffers = Hash.new { |h, k| h[k] = String.new.force_encoding('BINARY') }
+        buffers = Hash.new { |h, k| h[k] = String.new.force_encoding("BINARY") }
         loop do
           # Wait for an event to occur
           @io_selector.select do |monitor|
@@ -115,7 +114,7 @@ module Postal
               rescue => e
                 # If something goes wrong, log as appropriate and disconnect the client
                 if defined?(Raven)
-                  Raven.capture_exception(e, :extra => {:log_id => (client.id rescue nil)})
+                  Raven.capture_exception(e, extra: { log_id: (client.id rescue nil) })
                 end
                 logger.error "An error occurred while accepting a new client."
                 logger.error "#{e.class}: #{e.message}"
@@ -136,12 +135,12 @@ module Postal
                   # There is an extra step for SSL sockets
                   case io
                   when OpenSSL::SSL::SSLSocket
-                    buffers[io] << io.readpartial(10240)
-                    while(io.pending > 0)
-                      buffers[io] << io.readpartial(10240)
+                    buffers[io] << io.readpartial(10_240)
+                    while io.pending > 0
+                      buffers[io] << io.readpartial(10_240)
                     end
                   else
-                    buffers[io] << io.readpartial(10240)
+                    buffers[io] << io.readpartial(10_240)
                   end
                 rescue EOFError, Errno::ECONNRESET, Errno::ETIMEDOUT
                   # Client went away
@@ -212,9 +211,9 @@ module Postal
                 end
               rescue => e
                 # Something went wrong, log as appropriate
-                client_id = client ? client.id : '------'
+                client_id = client ? client.id : "------"
                 if defined?(Raven)
-                  Raven.capture_exception(e, :extra => {:log_id => (client.id rescue nil)})
+                  Raven.capture_exception(e, extra: { log_id: (client.id rescue nil) })
                 end
                 logger.error "[#{client_id}] An error occurred while processing data from a client."
                 logger.error "[#{client_id}] #{e.class}: #{e.message}"
@@ -247,12 +246,12 @@ module Postal
 
       def run
         # Write PID to file if path specified
-        if ENV['PID_FILE']
-          File.open(ENV['PID_FILE'], 'w') { |f| f.write(Process.pid.to_s + "\n") }
+        if ENV["PID_FILE"]
+          File.open(ENV["PID_FILE"], "w") { |f| f.write(Process.pid.to_s + "\n") }
         end
         # If we have been spawned to replace an existing processm shut down the
         # parent after listening.
-        if ENV['SERVER_FD']
+        if ENV["SERVER_FD"]
           listen
           kill_parent
         else

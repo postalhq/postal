@@ -1,4 +1,4 @@
-require 'highline'
+require "highline"
 
 module Postal
   module UserCreator
@@ -10,10 +10,10 @@ module Postal
       puts "This tool is usually only used to create your initial admin user."
       puts
       user = User.new
-      user.email_address = cli.ask("E-Mail Address".ljust(20, ' ') + ": ")
-      user.first_name = cli.ask("First Name".ljust(20, ' ') + ": ")
-      user.last_name = cli.ask("Last Name".ljust(20, ' ') + ": ")
-      user.password = cli.ask("Initial Password:".ljust(20, ' ') + ": ") { |value| value.echo = '*' }
+      user.email_address = cli.ask("E-Mail Address".ljust(20, " ") + ": ")
+      user.first_name = cli.ask("First Name".ljust(20, " ") + ": ")
+      user.last_name = cli.ask("Last Name".ljust(20, " ") + ": ")
+      user.password = cli.ask("Initial Password:".ljust(20, " ") + ": ") { |value| value.echo = "*" }
 
       block.call(user) if block_given?
       if user.save
@@ -28,7 +28,7 @@ module Postal
         end
         puts
       end
-
     end
+
   end
 end

@@ -1,13 +1,12 @@
 #!/usr/bin/env ruby
-trap("INT") { puts ; exit }
-
+trap("INT") { puts; exit }
 
 if ARGV[0].nil? || !(ARGV[0] =~ /@/)
   puts "usage: postal test-app-smtp [email address]"
   exit 1
 end
 
-require_relative '../config/environment'
+require_relative "../config/environment"
 
 begin
   Timeout.timeout(10) do

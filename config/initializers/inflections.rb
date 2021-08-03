@@ -12,13 +12,13 @@
 
 # These inflection rules are supported but not enabled by default:
 ActiveSupport::Inflector.inflections(:en) do |inflect|
-  inflect.acronym 'API'
-  inflect.acronym 'SMTP'
-  inflect.acronym 'IP'
-  inflect.acronym 'DNS'
-  inflect.acronym 'UUID'
-  inflect.acronym 'HTTP'
-  inflect.acronym 'DB'
-  inflect.acronym 'MX'
-  inflect.acronym 'DKIM'
+  inflect.acronym "API"
+  inflect.acronym "SMTP"
+  inflect.acronym "IP"
+  inflect.acronym "DNS"
+  inflect.acronym "UUID"
+  inflect.acronym "HTTP"
+  inflect.acronym "DB"
+  inflect.acronym "MX"
+  inflect.acronym "DKIM"
 end

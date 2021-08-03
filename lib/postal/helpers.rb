@@ -3,7 +3,8 @@ module Postal
 
     def self.strip_name_from_address(address)
       return nil if address.nil?
-      address.gsub(/.*</, '').gsub(/>.*/, '').gsub(/\(.+?\)/, '').strip
+
+      address.gsub(/.*</, "").gsub(/>.*/, "").gsub(/\(.+?\)/, "").strip
     end
 
   end

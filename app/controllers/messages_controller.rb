@@ -1,4 +1,4 @@
-  class MessagesController < ApplicationController
+class MessagesController < ApplicationController
 
   include WithinOrganization
 
@@ -6,12 +6,12 @@
   before_action { params[:id] && @message = @server.message_db.message(params[:id].to_i) }
 
   def new
-    if params[:direction] == 'incoming'
-      @message = IncomingMessagePrototype.new(@server, request.ip, 'web-ui', {})
+    if params[:direction] == "incoming"
+      @message = IncomingMessagePrototype.new(@server, request.ip, "web-ui", {})
       @message.from = session[:test_in_from] || current_user.email_tag
       @message.to = @server.routes.order(:name).first&.description
     else
-      @message = OutgoingMessagePrototype.new(@server, request.ip, 'web-ui', {})
+      @message = OutgoingMessagePrototype.new(@server, request.ip, "web-ui", {})
       @message.to = session[:test_out_to] || current_user.email_address
       if domain = @server.domains.verified.order(:name).first
         @message.from = "test@#{domain.name}"
@@ -22,28 +22,28 @@
   end
 
   def create
-    if params[:direction] == 'incoming'
+    if params[:direction] == "incoming"
       session[:test_in_from] = params[:message][:from] if params[:message]
-      @message = IncomingMessagePrototype.new(@server, request.ip, 'web-ui', params[:message])
-      @message.attachments = [{:name => "test.txt", :content_type => "text/plain", :data => "Hello world!"}]
+      @message = IncomingMessagePrototype.new(@server, request.ip, "web-ui", params[:message])
+      @message.attachments = [{ name: "test.txt", content_type: "text/plain", data: "Hello world!" }]
     else
       session[:test_out_to] = params[:message][:to] if params[:message]
-      @message = OutgoingMessagePrototype.new(@server, request.ip, 'web-ui', params[:message])
+      @message = OutgoingMessagePrototype.new(@server, request.ip, "web-ui", params[:message])
     end
     if result = @message.create_messages
       if result.size == 1
-        redirect_to_with_json organization_server_message_path(organization, @server, result.first.last[:id]), :notice => "Message was queued successfully"
+        redirect_to_with_json organization_server_message_path(organization, @server, result.first.last[:id]), notice: "Message was queued successfully"
       else
-        redirect_to_with_json [:queue, organization, @server], :notice => "Messages queued successfully "
+        redirect_to_with_json [:queue, organization, @server], notice: "Messages queued successfully "
       end
     else
       respond_to do |wants|
         wants.html do
           flash.now[:alert] = "Your message could not be sent. Ensure that all fields are completed fully. #{result.errors.inspect}"
-          render 'new'
+          render "new"
         end
         wants.json do
-          render :json => {:flash => {:alert => "Your message could not be sent. Please check all field are completed fully."}}
+          render json: { flash: { alert: "Your message could not be sent. Please check all field are completed fully." } }
         end
       end
 
@@ -52,58 +52,62 @@
 
   def outgoing
     @searchable = true
-    get_messages('outgoing')
+    get_messages("outgoing")
     respond_to do |wants|
       wants.html
-      wants.json { render :json => {
-        :flash => flash.each_with_object({}) { |(type, message), hash| hash[type] = message},
-        :region_html => render_to_string(:partial => 'index', :formats => [:html])
-      }}
+      wants.json do
+        render json: {
+          flash: flash.each_with_object({}) { |(type, message), hash| hash[type] = message },
+          region_html: render_to_string(partial: "index", formats: [:html])
+        }
+      end
     end
   end
 
   def incoming
     @searchable = true
-    get_messages('incoming')
+    get_messages("incoming")
     respond_to do |wants|
       wants.html
-      wants.json { render :json => {
-        :flash => flash.each_with_object({}) { |(type, message), hash| hash[type] = message},
-        :region_html => render_to_string(:partial => 'index', :formats => [:html])
-      }}
+      wants.json do
+        render json: {
+          flash: flash.each_with_object({}) { |(type, message), hash| hash[type] = message },
+          region_html: render_to_string(partial: "index", formats: [:html])
+        }
+      end
     end
   end
 
   def held
-    get_messages('held')
+    get_messages("held")
   end
 
   def deliveries
-    render :json => {:html => render_to_string(:partial => 'deliveries', :locals => {:message => @message})}
+    render json: { html: render_to_string(partial: "deliveries", locals: { message: @message }) }
   end
 
   def html_raw
-    render :html => @message.html_body_without_tracking_image.html_safe
+    render html: @message.html_body_without_tracking_image.html_safe
   end
 
   def spam_checks
-    @spam_checks = @message.spam_checks.sort_by { |s| s['score']}.reverse
+    @spam_checks = @message.spam_checks.sort_by { |s| s["score"] }.reverse
   end
 
   def attachment
     if @message.attachments.size > params[:attachment].to_i
       attachment = @message.attachments[params[:attachment].to_i]
-      send_data attachment.body, :content_type => attachment.mime_type, :disposition => 'download', :filename => attachment.filename
+      send_data attachment.body, content_type: attachment.mime_type, disposition: "download", filename: attachment.filename
     else
-      redirect_to attachments_organization_server_message_path(organization, @server, @message.id), :alert => "Attachment not found. Choose an attachment from the list below."
+      redirect_to attachments_organization_server_message_path(organization, @server, @message.id), alert: "Attachment not found. Choose an attachment from the list below."
     end
   end
 
   def download
     if @message.raw_message
-      send_data @message.raw_message, :filename => "Message-#{organization.permalink}-#{@server.permalink}-#{@message.id}.eml", :content_type => "text/plain"
+      send_data @message.raw_message, filename: "Message-#{organization.permalink}-#{@server.permalink}-#{@message.id}.eml", content_type: "text/plain"
     else
-      redirect_to organization_server_message_path(organization, @server, @message.id), :alert => "We no longer have the raw message stored for this message."
+      redirect_to organization_server_message_path(organization, @server, @message.id), alert: "We no longer have the raw message stored for this message."
     end
   end
 
@@ -113,10 +117,10 @@
         @message.queued_message.queue!
         flash[:notice] = "This message will be retried shortly."
       elsif @message.held?
-        @message.add_to_message_queue(:manual => true)
+        @message.add_to_message_queue(manual: true)
         flash[:notice] = "This message has been released. Delivery will be attempted shortly."
       else
-        @message.add_to_message_queue(:manual => true)
+        @message.add_to_message_queue(manual: true)
         flash[:notice] = "This message will be redelivered shortly."
       end
     else
@@ -148,10 +152,10 @@
   private
 
   def get_messages(scope)
-    if scope == 'held'
-      options = {:where => {:held => 1}}
+    if scope == "held"
+      options = { where: { held: 1 } }
     else
-      options = {:where => {:scope => scope, :spam => false}, :order => :timestamp, :direction => 'desc'}
+      options = { where: { scope: scope, spam: false }, order: :timestamp, direction: "desc" }
 
       if @query = (params[:query] || session["msg_query_#{@server.id}_#{scope}"]).presence
         session["msg_query_#{@server.id}_#{scope}"] = @query
@@ -160,8 +164,8 @@
           flash.now[:alert] = "It doesn't appear you entered anything to filter on. Please double check your query."
         else
           @queried = true
-          if qs[:order] == 'oldest-first'
-            options[:direction] = 'asc'
+          if qs[:order] == "oldest-first"
+            options[:direction] = "asc"
           end
 
           options[:where][:rcpt_to] = qs[:to] if qs[:to]
@@ -176,7 +180,7 @@
           end
           options[:where][:tag] = qs[:tag] if qs[:tag]
           options[:where][:id] = qs[:id] if qs[:id]
-          options[:where][:spam] = true if qs[:spam] == 'yes' || qs[:spam] == 'y'
+          options[:where][:spam] = true if qs[:spam] == "yes" || qs[:spam] == "y"
           if qs[:before] || qs[:after]
             options[:where][:timestamp] = {}
             if qs[:before]
@@ -208,12 +212,12 @@
 
   def get_time_from_string(string)
     begin
-      if string =~ /\A(\d{2,4})\-(\d{2})\-(\d{2}) (\d{2})\:(\d{2})\z/
+      if string =~ /\A(\d{2,4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})\z/
         time = Time.new($1.to_i, $2.to_i, $3.to_i, $4.to_i, $5.to_i)
-      elsif string =~ /\A(\d{2,4})\-(\d{2})\-(\d{2})\z/
+      elsif string =~ /\A(\d{2,4})-(\d{2})-(\d{2})\z/
         time = Time.new($1.to_i, $2.to_i, $3.to_i, 0)
       else
-        time = Chronic.parse(string, :context => :past)
+        time = Chronic.parse(string, context: :past)
       end
     rescue
     end

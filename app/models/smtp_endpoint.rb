@@ -21,17 +21,17 @@ class SMTPEndpoint < ApplicationRecord
   include HasUUID
 
   belongs_to :server
-  has_many :routes, :as => :endpoint
-  has_many :additional_route_endpoints, :dependent => :destroy, :as => :endpoint
+  has_many :routes, as: :endpoint
+  has_many :additional_route_endpoints, dependent: :destroy, as: :endpoint
 
-  SSL_MODES = ['None', 'Auto', 'STARTTLS', 'TLS']
+  SSL_MODES = ["None", "Auto", "STARTTLS", "TLS"]
 
   before_destroy :update_routes
 
-  validates :name, :presence => true
-  validates :hostname, :presence => true, :format => /\A[a-z0-9\.\-]*\z/
-  validates :ssl_mode, :inclusion => {:in => SSL_MODES}
-  validates :port, :numericality => {:only_integer => true, :allow_blank => true}
+  validates :name, presence: true
+  validates :hostname, presence: true, format: /\A[a-z0-9.\-]*\z/
+  validates :ssl_mode, inclusion: { in: SSL_MODES }
+  validates :port, numericality: { only_integer: true, allow_blank: true }
 
   def description
     "#{name} (#{hostname})"
@@ -42,7 +42,7 @@ class SMTPEndpoint < ApplicationRecord
   end
 
   def update_routes
-    self.routes.each { |r| r.update(:endpoint => nil, :mode => 'Reject') }
+    routes.each { |r| r.update(endpoint: nil, mode: "Reject") }
   end
 
 end

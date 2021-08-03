@@ -26,19 +26,19 @@ class HTTPEndpoint < ApplicationRecord
   include HasUUID
 
   belongs_to :server
-  has_many :routes, :as => :endpoint
-  has_many :additional_route_endpoints, :dependent => :destroy, :as => :endpoint
+  has_many :routes, as: :endpoint
+  has_many :additional_route_endpoints, dependent: :destroy, as: :endpoint
 
-  ENCODINGS = ['BodyAsJSON', 'FormData']
-  FORMATS = ['Hash', 'RawMessage']
+  ENCODINGS = ["BodyAsJSON", "FormData"]
+  FORMATS = ["Hash", "RawMessage"]
 
   before_destroy :update_routes
 
-  validates :name, :presence => true
-  validates :url, :presence => true
-  validates :encoding, :inclusion => {:in => ENCODINGS}
-  validates :format, :inclusion => {:in => FORMATS}
-  validates :timeout, :numericality => {:greater_than_or_equal_to => 5, :less_than_or_equal_to => 60}
+  validates :name, presence: true
+  validates :url, presence: true
+  validates :encoding, inclusion: { in: ENCODINGS }
+  validates :format, inclusion: { in: FORMATS }
+  validates :timeout, numericality: { greater_than_or_equal_to: 5, less_than_or_equal_to: 60 }
 
   default_value :timeout, -> { DEFAULT_TIMEOUT }
 
@@ -51,7 +51,7 @@ class HTTPEndpoint < ApplicationRecord
   end
 
   def update_routes
-    self.routes.each { |r| r.update(:endpoint => nil, :mode => 'Reject') }
+    routes.each { |r| r.update(endpoint: nil, mode: "Reject") }
   end
 
 end

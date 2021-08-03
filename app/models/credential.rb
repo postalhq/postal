@@ -21,11 +21,11 @@ class Credential < ApplicationRecord
 
   belongs_to :server
 
-  TYPES = ['SMTP', 'API', 'SMTP-IP']
+  TYPES = ["SMTP", "API", "SMTP-IP"]
 
-  validates :key, :presence => true, :uniqueness => true
-  validates :type, :inclusion => {:in => TYPES}
-  validates :name, :presence => true
+  validates :key, presence: true, uniqueness: true
+  validates :type, inclusion: { in: TYPES }
+  validates :name, presence: true
   validate :validate_key_cannot_be_changed
   validate :validate_key_for_smtp_ip
 
@@ -33,10 +33,9 @@ class Credential < ApplicationRecord
 
   before_validation :generate_key
 
-
   def generate_key
-    return if self.type == 'SMTP-IP'
-    return if self.persisted?
+    return if type == "SMTP-IP"
+    return if persisted?
 
     self.key = SecureRandomString.new(24)
   end
@@ -51,26 +50,26 @@ class Credential < ApplicationRecord
 
   def usage_type
     if last_used_at.nil?
-      'Unused'
+      "Unused"
     elsif last_used_at < 1.year.ago
-      'Inactive'
+      "Inactive"
     elsif last_used_at < 6.months.ago
-      'Dormant'
+      "Dormant"
     elsif last_used_at < 1.month.ago
-      'Quiet'
+      "Quiet"
     else
-      'Active'
+      "Active"
     end
   end
 
   def to_smtp_plain
-    Base64.encode64("\0XX\0#{self.key}").strip
+    Base64.encode64("\0XX\0#{key}").strip
   end
 
   def ipaddr
-    return unless type == 'SMTP-IP'
+    return unless type == "SMTP-IP"
 
-    @ipaddr ||= IPAddr.new(self.key)
+    @ipaddr ||= IPAddr.new(key)
   rescue IPAddr::InvalidAddressError
     nil
   end
@@ -80,15 +79,15 @@ class Credential < ApplicationRecord
   def validate_key_cannot_be_changed
     return if new_record?
     return unless key_changed?
-    return if type == 'SMTP-IP'
+    return if type == "SMTP-IP"
 
     errors.add :key, "cannot be changed"
   end
 
   def validate_key_for_smtp_ip
-    return unless type == 'SMTP-IP'
+    return unless type == "SMTP-IP"
 
-    IPAddr.new(self.key.to_s)
+    IPAddr.new(key.to_s)
   rescue IPAddr::InvalidAddressError
     errors.add :key, "must be a valid IPv4 or IPv6 address"
   end

@@ -1,14 +1,14 @@
 module Postal
   class MessageParser
 
-    URL_REGEX = /(?<url>(?<protocol>https?)\:\/\/(?<domain>[A-Za-z0-9\-\.\:]+)(?<path>\/[A-Za-z0-9\.\/\+\?\&\-\_\%\=\~\:\;\(\)\[\]#]*)?+)/
+    URL_REGEX = /(?<url>(?<protocol>https?):\/\/(?<domain>[A-Za-z0-9\-.:]+)(?<path>\/[A-Za-z0-9.\/+?&\-_%=~:;()\[\]#]*)?+)/
 
     def initialize(message)
       @message = message
       @actioned = false
       @tracked_links = 0
       @tracked_images = 0
-      @domain = @message.server.track_domains.where(:domain => @message.domain, :dns_status => "OK").first
+      @domain = @message.server.track_domains.where(domain: @message.domain, dns_status: "OK").first
 
       if @domain
         @parsed_output = generate
@@ -36,11 +36,11 @@ module Postal
           if @mail.mime_type =~ /text\/plain/
             @mail.body = parse(@mail.body.decoded.dup, :text)
             @mail.content_transfer_encoding = nil
-            @mail.charset = 'UTF-8'
+            @mail.charset = "UTF-8"
           elsif @mail.mime_type =~ /text\/html/
             @mail.body = parse(@mail.body.decoded.dup, :html)
             @mail.content_transfer_encoding = nil
-            @mail.charset = 'UTF-8'
+            @mail.charset = "UTF-8"
           end
         end
       else
@@ -66,11 +66,11 @@ module Postal
         if part.content_type =~ /text\/html/
           part.body = parse(part.body.decoded.dup, :html)
           part.content_transfer_encoding = nil
-          part.charset = 'UTF-8'
+          part.charset = "UTF-8"
         elsif part.content_type =~ /text\/plain/
           part.body = parse(part.body.decoded.dup, :text)
           part.content_transfer_encoding = nil
-          part.charset = 'UTF-8'
+          part.charset = "UTF-8"
         elsif part.content_type =~ /multipart\/(alternative|related)/
           unless part.parts.empty?
             parse_parts(part.parts)
@@ -110,7 +110,7 @@ module Postal
       end
 
       if type == :html
-        part.gsub!(/href=([\'\"])(#{URL_REGEX})[\'\"]/) do
+        part.gsub!(/href=(['"])(#{URL_REGEX})['"]/) do
           if track_domain?($~[:domain])
             @tracked_links += 1
             token = @message.create_link($~[:url])
@@ -121,7 +121,7 @@ module Postal
         end
       end
 
-      part.gsub!(/(https?)\+notrack\:\/\//) do
+      part.gsub!(/(https?)\+notrack:\/\//) do
         @actioned = true
         "#{$1}://"
       end
@@ -132,7 +132,7 @@ module Postal
     def insert_tracking_image(part)
       @tracked_images += 1
       container = "<p class='ampimg' style='display:none;visibility:none;margin:0;padding:0;line-height:0;'><img src='#{domain}/img/#{@message.server.token}/#{@message.token}' alt=''></p>"
-      if part =~ /\<\/body\>/
+      if part =~ /<\/body>/
         part.gsub("</body>", "#{container}</body>")
       else
         part + container

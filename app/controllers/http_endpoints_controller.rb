@@ -19,7 +19,7 @@ class HTTPEndpointsController < ApplicationController
       flash[:notice] = params[:return_notice] if params[:return_notice].present?
       redirect_to_with_json [:return_to, [organization, @server, :http_endpoints]]
     else
-      render_form_errors 'new', @http_endpoint
+      render_form_errors "new", @http_endpoint
     end
   end
 
@@ -27,7 +27,7 @@ class HTTPEndpointsController < ApplicationController
     if @http_endpoint.update(safe_params)
       redirect_to_with_json [organization, @server, :http_endpoints]
     else
-      render_form_errors 'edit', @http_endpoint
+      render_form_errors "edit", @http_endpoint
     end
   end
 

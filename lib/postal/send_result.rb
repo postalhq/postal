@@ -1,5 +1,6 @@
 module Postal
   class SendResult
+
     attr_accessor :type
     attr_accessor :details
     attr_accessor :retry
@@ -9,5 +10,6 @@ module Postal
     attr_accessor :log_id
     attr_accessor :time
     attr_accessor :suppress_bounce
+
   end
 end

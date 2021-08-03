@@ -1,7 +1,6 @@
-require 'rails_helper'
+require "rails_helper"
 
 describe Postal::MessageDB::Database do
-
   context "when provisioned" do
     subject(:database) { GLOBAL_SERVER.message_db }
 
@@ -13,5 +12,4 @@ describe Postal::MessageDB::Database do
       expect(database.schema_version).to be_a Integer
     end
   end
-
 end

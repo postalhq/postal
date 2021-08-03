@@ -24,19 +24,19 @@ class Webhook < ApplicationRecord
   include HasUUID
 
   belongs_to :server
-  has_many :webhook_events, :dependent => :destroy
+  has_many :webhook_events, dependent: :destroy
   has_many :webhook_requests
 
-  validates :name, :presence => true
-  validates :url, :presence => true, :format => {:with => /\Ahttps?\:\/\/[a-z0-9\-\.\_\?\=\&\/\+:]+\z/i, :allow_blank => true}
+  validates :name, presence: true
+  validates :url, presence: true, format: { with: /\Ahttps?:\/\/[a-z0-9\-._?=&\/+:]+\z/i, allow_blank: true }
 
-  scope :enabled, -> { where(:enabled => true) }
+  scope :enabled, -> { where(enabled: true) }
 
   after_save :save_events
 
-  when_attribute :all_events, :changes_to => true do
+  when_attribute :all_events, changes_to: true do
     after_save do
-      self.webhook_events.destroy_all
+      webhook_events.destroy_all
     end
   end
 
@@ -51,9 +51,9 @@ class Webhook < ApplicationRecord
   def save_events
     if @events
       @events.each do |event|
-        webhook_events.where(:event => event).first_or_create!
+        webhook_events.where(event: event).first_or_create!
       end
-      webhook_events.where.not(:event => @events).destroy_all
+      webhook_events.where.not(event: @events).destroy_all
     end
   end
 

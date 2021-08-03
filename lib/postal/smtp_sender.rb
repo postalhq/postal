@@ -1,4 +1,4 @@
-require 'resolv'
+require "resolv"
 
 module Postal
   class SMTPSender < Sender
@@ -10,7 +10,7 @@ module Postal
       @smtp_client = nil
       @connection_errors = []
       @hostnames = []
-      @log_id = Nifty::Utils::RandomString.generate(:length => 8).upcase
+      @log_id = Nifty::Utils::RandomString.generate(length: 8).upcase
     end
 
     def start
@@ -22,16 +22,15 @@ module Postal
         elsif server.is_a?(Hash)
           hostname = server[:hostname]
           port = server[:port] || 25
-          ssl_mode = server[:ssl_mode] || 'Auto'
+          ssl_mode = server[:ssl_mode] || "Auto"
         else
           hostname = server
           port = 25
-          ssl_mode = 'Auto'
+          ssl_mode = "Auto"
         end
 
         @hostnames << hostname
         [:aaaa, :a].each do |ip_type|
-
           if @source_ip_address && @source_ip_address.ipv6.blank? && ip_type == :aaaa
             # Don't try to use IPv6 if the IP address we're sending from doesn't support it.
             next
@@ -54,11 +53,11 @@ module Postal
               smtp_client.source_address = ip_type == :aaaa ? @source_ip_address.ipv6 : @source_ip_address.ipv4
             end
             case ssl_mode
-            when 'Auto'
+            when "Auto"
               smtp_client.enable_starttls_auto(self.class.ssl_context_without_verify)
-            when 'STARTTLS'
+            when "STARTTLS"
               smtp_client.enable_starttls(self.class.ssl_context_with_verify)
-            when 'TLS'
+            when "TLS"
               smtp_client.enable_tls(self.class.ssl_context_with_verify)
             else
               # Nothing
@@ -115,7 +114,7 @@ module Postal
       begin
         if message.bounce == 1
           mail_from = ""
-        elsif message.domain.return_path_status == 'OK'
+        elsif message.domain.return_path_status == "OK"
           mail_from = "#{message.server.token}@#{message.domain.return_path_domain}"
         else
           mail_from = "#{message.server.token}@#{Postal.config.dns.return_path}"
@@ -127,10 +126,10 @@ module Postal
             log "-> No SMTP server available for #{@domain}"
             log "-> Hostnames: #{@hostnames.inspect}"
             log "-> Errors: #{@connection_errors.inspect}"
-            result.type = 'SoftFail'
+            result.type = "SoftFail"
             result.retry = true
             result.details = "No SMTP servers were available for #{@domain}. Tried #{@hostnames.to_sentence}"
-            result.output = @connection_errors.join(', ')
+            result.output = @connection_errors.join(", ")
             result.connect_error = true
             return result
           else
@@ -147,17 +146,16 @@ module Postal
             raise
           end
         end
-        result.type = 'Sent'
+        result.type = "Sent"
         result.details = "Message for #{rcpt_to} accepted by #{destination_host_description}"
         if @smtp_client.source_address
           result.details += " (from #{@smtp_client.source_address})"
         end
         result.output = smtp_result.string
         log "Message sent ##{message.id} to #{destination_host_description} for #{rcpt_to}"
-
       rescue Net::SMTPServerBusy, Net::SMTPAuthenticationError, Net::SMTPSyntaxError, Net::SMTPUnknownError, Net::ReadTimeout => e
         log "#{e.class}: #{e.message}"
-        result.type = 'SoftFail'
+        result.type = "SoftFail"
         result.retry = true
         result.details = "Temporary SMTP delivery error when sending to #{destination_host_description}"
         result.output = e.message
@@ -170,16 +168,16 @@ module Postal
         safe_rset
       rescue Net::SMTPFatalError => e
         log "#{e.class}: #{e.message}"
-        result.type = 'HardFail'
+        result.type = "HardFail"
         result.details = "Permanent SMTP delivery error when sending to #{destination_host_description}"
         result.output = e.message
         safe_rset
       rescue => e
         log "#{e.class}: #{e.message}"
         if defined?(Raven)
-          Raven.capture_exception(e, :extra => {:log_id => @log_id, :server_id => message.server.id, :message_id => message.id})
+          Raven.capture_exception(e, extra: { log_id: @log_id, server_id: message.server.id, message_id: message.id })
         end
-        result.type = 'SoftFail'
+        result.type = "SoftFail"
         result.retry = true
         result.details = "An error occurred while sending the message to #{destination_host_description}"
         result.output = e.message
@@ -219,7 +217,7 @@ module Postal
     def lookup_ip_address(type, hostname)
       records = []
       Resolv::DNS.open do |dns|
-        dns.timeouts = [10,5]
+        dns.timeouts = [10, 5]
         case type
         when :a
           records = dns.getresources(hostname, Resolv::DNS::Resource::IN::A)
@@ -230,41 +228,46 @@ module Postal
       records.first&.address&.to_s&.downcase
     end
 
-    def self.ssl_context_with_verify
-      @ssl_context_with_verify ||= begin
-        c = OpenSSL::SSL::SSLContext.new
-        c.verify_mode = OpenSSL::SSL::VERIFY_PEER
-        c.cert_store = OpenSSL::X509::Store.new
-        c.cert_store.set_default_paths
-        c
-      end
-    end
 
-    def self.ssl_context_without_verify
-      @ssl_context_without_verify ||= begin
-        c = OpenSSL::SSL::SSLContext.new
-        c.verify_mode = OpenSSL::SSL::VERIFY_NONE
-        c
-      end
-    end
+    class << self
 
-    def self.default_helo_hostname
-      Postal.config.dns.helo_hostname || Postal.config.dns.smtp_server_hostname || "localhost"
-    end
-
-    def self.relay_hosts
-      hosts = Postal.config.smtp_relays.map do |relay|
-        if relay.hostname.present?
-          {
-            :hostname => relay.hostname,
-            :port => relay.port,
-            :ssl_mode => relay.ssl_mode
-          }
-        else
-          nil
+      def ssl_context_with_verify
+        @ssl_context_with_verify ||= begin
+          c = OpenSSL::SSL::SSLContext.new
+          c.verify_mode = OpenSSL::SSL::VERIFY_PEER
+          c.cert_store = OpenSSL::X509::Store.new
+          c.cert_store.set_default_paths
+          c
         end
-      end.compact
-      hosts.empty? ? nil : hosts
+      end
+
+      def ssl_context_without_verify
+        @ssl_context_without_verify ||= begin
+          c = OpenSSL::SSL::SSLContext.new
+          c.verify_mode = OpenSSL::SSL::VERIFY_NONE
+          c
+        end
+      end
+
+      def default_helo_hostname
+        Postal.config.dns.helo_hostname || Postal.config.dns.smtp_server_hostname || "localhost"
+      end
+
+      def relay_hosts
+        hosts = Postal.config.smtp_relays.map do |relay|
+          if relay.hostname.present?
+            {
+              hostname: relay.hostname,
+              port: relay.port,
+              ssl_mode: relay.ssl_mode
+            }
+          else
+            nil
+          end
+        end.compact
+        hosts.empty? ? nil : hosts
+      end
+
     end
 
   end

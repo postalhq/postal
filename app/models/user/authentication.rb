@@ -2,9 +2,9 @@ class User
 
   has_secure_password
 
-  validates :password, :length => {:minimum => 8, :allow_blank => true}
+  validates :password, length: { minimum: 8, allow_blank: true }
 
-  when_attribute :password_digest, :changes_to => :anything do
+  when_attribute :password_digest, changes_to: :anything do
     before_save do
       self.password_reset_token = nil
       self.password_reset_token_valid_until = nil
@@ -12,9 +12,10 @@ class User
   end
 
   def self.authenticate(email_address, password)
-    user = where(:email_address => email_address).first
-    raise Postal::Errors::AuthenticationError.new('InvalidEmailAddress') if user.nil?
-    raise Postal::Errors::AuthenticationError.new('InvalidPassword') unless user.authenticate(password)
+    user = where(email_address: email_address).first
+    raise Postal::Errors::AuthenticationError.new("InvalidEmailAddress") if user.nil?
+    raise Postal::Errors::AuthenticationError.new("InvalidPassword") unless user.authenticate(password)
+
     user
   end
 
@@ -27,9 +28,9 @@ class User
   end
 
   def begin_password_reset(return_to = nil)
-    self.password_reset_token = Nifty::Utils::RandomString.generate(:length => 24)
+    self.password_reset_token = Nifty::Utils::RandomString.generate(length: 24)
     self.password_reset_token_valid_until = 1.day.from_now
-    self.save!
+    save!
     AppMailer.password_reset(self, return_to).deliver
   end
 

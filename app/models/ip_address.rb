@@ -16,9 +16,9 @@ class IPAddress < ApplicationRecord
 
   belongs_to :ip_pool
 
-  validates :ipv4, :presence => true, :uniqueness => true
-  validates :hostname, :presence => true
-  validates :ipv6, :uniqueness => {:allow_blank => true}
+  validates :ipv4, presence: true, uniqueness: true
+  validates :hostname, presence: true
+  validates :ipv6, uniqueness: { allow_blank: true }
   validates :priority, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 100, only_integer: true }
 
   scope :order_by_priority, -> { order(priority: :desc) }

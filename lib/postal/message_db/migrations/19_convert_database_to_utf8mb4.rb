@@ -2,6 +2,7 @@ module Postal
   module MessageDB
     module Migrations
       class ConvertDatabaseToUtf8mb4 < Postal::MessageDB::Migration
+
         def up
           @database.query("ALTER DATABASE `#{@database.database_name}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
           @database.query("ALTER TABLE `#{@database.database_name}`.`clicks` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
@@ -20,6 +21,7 @@ module Postal
           @database.query("ALTER TABLE `#{@database.database_name}`.`suppressions` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
           @database.query("ALTER TABLE `#{@database.database_name}`.`webhook_requests` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
         end
+
       end
     end
   end

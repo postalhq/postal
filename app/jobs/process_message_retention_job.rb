@@ -1,4 +1,5 @@
 class ProcessMessageRetentionJob < Postal::Job
+
   def perform
     Server.all.each do |server|
       if server.raw_message_retention_days
@@ -18,4 +19,5 @@ class ProcessMessageRetentionJob < Postal::Job
       end
     end
   end
+
 end

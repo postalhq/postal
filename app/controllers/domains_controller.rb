@@ -28,7 +28,7 @@ class DomainsController < ApplicationController
     @domain = scope.build(params.require(:domain).permit(:name, :verification_method))
 
     if current_user.admin?
-      @domain.verification_method = 'DNS'
+      @domain.verification_method = "DNS"
       @domain.verified_at = Time.now
     end
 
@@ -39,7 +39,7 @@ class DomainsController < ApplicationController
         redirect_to_with_json [:verify, organization, @server, @domain]
       end
     else
-      render_form_errors 'new', @domain
+      render_form_errors "new", @domain
     end
   end
 
@@ -50,39 +50,40 @@ class DomainsController < ApplicationController
 
   def verify
     if @domain.verified?
-      redirect_to [organization, @server, :domains], :alert => "#{@domain.name} has already been verified."
+      redirect_to [organization, @server, :domains], alert: "#{@domain.name} has already been verified."
       return
     end
 
     if request.post?
       case @domain.verification_method
-      when 'DNS'
+      when "DNS"
         if @domain.verify_with_dns
-          redirect_to_with_json [:setup, organization, @server, @domain], :notice => "#{@domain.name} has been verified successfully. You now need to configure your DNS records."
+          redirect_to_with_json [:setup, organization, @server, @domain], notice: "#{@domain.name} has been verified successfully. You now need to configure your DNS records."
         else
           respond_to do |wants|
             wants.html { flash.now[:alert] = "We couldn't verify your domain. Please double check you've added the TXT record correctly." }
-            wants.json { render :json => {:flash => {:alert => "We couldn't verify your domain. Please double check you've added the TXT record correctly."}}}
+            wants.json { render json: { flash: { alert: "We couldn't verify your domain. Please double check you've added the TXT record correctly." } } }
           end
         end
-      when 'Email'
+      when "Email"
         if params[:code]
           if @domain.verification_token == params[:code].to_s.strip
             @domain.verify
-            redirect_to_with_json [:setup, organization, @server, @domain], :notice => "#{@domain.name} has been verified successfully. You now need to configure your DNS records."
+            redirect_to_with_json [:setup, organization, @server, @domain], notice: "#{@domain.name} has been verified successfully. You now need to configure your DNS records."
           else
             respond_to do |wants|
               wants.html { flash.now[:alert] = "Invalid verification code. Please check and try again." }
-              wants.json { render :json => {:flash => {:alert => "Invalid verification code. Please check and try again."}}}
+              wants.json { render json: { flash: { alert: "Invalid verification code. Please check and try again." } } }
             end
           end
         elsif params[:email_address].present?
           raise Postal::Error, "Invalid email address" unless @domain.verification_email_addresses.include?(params[:email_address])
+
           AppMailer.verify_domain(@domain, params[:email_address], current_user).deliver
           if @domain.owner.is_a?(Server)
-            redirect_to_with_json verify_organization_server_domain_path(organization, @server, @domain, :email_address => params[:email_address])
+            redirect_to_with_json verify_organization_server_domain_path(organization, @server, @domain, email_address: params[:email_address])
           else
-            redirect_to_with_json verify_organization_domain_path(organization, @domain, :email_address => params[:email_address])
+            redirect_to_with_json verify_organization_domain_path(organization, @domain, email_address: params[:email_address])
           end
         end
       end
@@ -91,15 +92,15 @@ class DomainsController < ApplicationController
 
   def setup
     unless @domain.verified?
-      redirect_to [:verify, organization, @server, @domain], :alert => "You can't set up DNS for this domain until it has been verified."
+      redirect_to [:verify, organization, @server, @domain], alert: "You can't set up DNS for this domain until it has been verified."
     end
   end
 
   def check
     if @domain.check_dns(:manual)
-      redirect_to_with_json [organization, @server, :domains], :notice => "Your DNS records for #{@domain.name} look good!"
+      redirect_to_with_json [organization, @server, :domains], notice: "Your DNS records for #{@domain.name} look good!"
     else
-      redirect_to_with_json [:setup, organization, @server, @domain], :alert => "There seems to be something wrong with your DNS records. Check below for information."
+      redirect_to_with_json [:setup, organization, @server, @domain], alert: "There seems to be something wrong with your DNS records. Check below for information."
     end
   end
 

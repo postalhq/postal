@@ -1,4 +1,5 @@
 class SMTPEndpointsController < ApplicationController
+
   include WithinOrganization
   before_action { @server = organization.servers.present.find_by_permalink!(params[:server_id]) }
   before_action { params[:id] && @smtp_endpoint = @server.smtp_endpoints.find_by_uuid!(params[:id]) }
@@ -17,7 +18,7 @@ class SMTPEndpointsController < ApplicationController
       flash[:notice] = params[:return_notice] if params[:return_notice].present?
       redirect_to_with_json [:return_to, [organization, @server, :smtp_endpoints]]
     else
-      render_form_errors 'new', @smtp_endpoint
+      render_form_errors "new", @smtp_endpoint
     end
   end
 
@@ -25,7 +26,7 @@ class SMTPEndpointsController < ApplicationController
     if @smtp_endpoint.update(safe_params)
       redirect_to_with_json [organization, @server, :smtp_endpoints]
     else
-      render_form_errors 'edit', @smtp_endpoint
+      render_form_errors "edit", @smtp_endpoint
     end
   end
 

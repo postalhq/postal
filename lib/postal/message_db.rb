@@ -1,5 +1,6 @@
 module Postal
   module MessageDB
+
     extend ActiveSupport::Autoload
     eager_autoload do
       autoload :Click
@@ -14,5 +15,6 @@ module Postal
       autoload :SuppressionList
       autoload :Webhooks
     end
+
   end
 end

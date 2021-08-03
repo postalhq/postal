@@ -24,7 +24,6 @@
 #
 
 FactoryBot.define do
-
   factory :user do
     first_name { "John" }
     last_name { "Doe" }
@@ -32,5 +31,4 @@ FactoryBot.define do
     email_verified_at { Time.now }
     sequence(:email_address) { |n| "user#{n}@example.com" }
   end
-
 end

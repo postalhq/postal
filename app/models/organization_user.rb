@@ -14,6 +14,6 @@
 class OrganizationUser < ApplicationRecord
 
   belongs_to :organization
-  belongs_to :user, :polymorphic => true, :optional => true
+  belongs_to :user, polymorphic: true, optional: true
 
 end

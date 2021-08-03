@@ -6,7 +6,7 @@ module Postal
         @database = database
       end
 
-      STATS_GAPS = {:hourly => :hour, :daily => :day, :monthly => :month, :yearly => :year}
+      STATS_GAPS = { hourly: :hour, daily: :day, monthly: :month, yearly: :year }
       COUNTERS = [:incoming, :outgoing, :spam, :bounces, :held]
 
       #
@@ -44,8 +44,8 @@ module Postal
             h[c] = 0
           end
         end
-        @database.select("stats_#{type}", :where => {:time => items.keys.map(&:to_i)}, :fields => [:time] | counters).each do |data|
-          time = Time.zone.at(data.delete('time'))
+        @database.select("stats_#{type}", where: { time: items.keys.map(&:to_i) }, fields: [:time] | counters).each do |data|
+          time = Time.zone.at(data.delete("time"))
           data.each do |key, value|
             items[time][key.to_sym] = value
           end

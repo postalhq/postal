@@ -29,7 +29,7 @@ class IPPoolRulesController < ApplicationController
     if @ip_pool_rule.save
       redirect_to_with_json [organization, @server, :ip_pool_rules]
     else
-      render_form_errors 'new', @ip_pool_rule
+      render_form_errors "new", @ip_pool_rule
     end
   end
 
@@ -37,7 +37,7 @@ class IPPoolRulesController < ApplicationController
     if @ip_pool_rule.update(safe_params)
       redirect_to_with_json [organization, @server, :ip_pool_rules]
     else
-      render_form_errors 'edit', @ip_pool_rule
+      render_form_errors "edit", @ip_pool_rule
     end
   end
 

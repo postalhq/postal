@@ -1,6 +1,7 @@
 class CheckAllDNSJob < Postal::Job
+
   def perform
-    Domain.where.not(:dns_checked_at => nil).where("dns_checked_at <= ?", 1.hour.ago).each do |domain|
+    Domain.where.not(dns_checked_at: nil).where("dns_checked_at <= ?", 1.hour.ago).each do |domain|
       log "Checking DNS for domain: #{domain.name}"
       domain.check_dns(:auto)
     end
@@ -10,4 +11,5 @@ class CheckAllDNSJob < Postal::Job
       domain.check_dns
     end
   end
+
 end

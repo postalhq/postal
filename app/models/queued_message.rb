@@ -29,21 +29,21 @@ class QueuedMessage < ApplicationRecord
   include HasMessage
 
   belongs_to :server
-  belongs_to :ip_address, :optional => true
-  belongs_to :user, :optional => true
+  belongs_to :ip_address, optional: true
+  belongs_to :user, optional: true
 
   before_create :allocate_ip_address
-  after_commit :queue, :on => :create
+  after_commit :queue, on: :create
 
-  scope :unlocked, -> { where(:locked_at => nil) }
+  scope :unlocked, -> { where(locked_at: nil) }
   scope :retriable, -> { where("retry_after IS NULL OR retry_after <= ?", 30.seconds.from_now) }
 
   def retriable?
-    self.retry_after.nil? || self.retry_after <= 30.seconds.from_now
+    retry_after.nil? || retry_after <= 30.seconds.from_now
   end
 
   def queue
-    UnqueueMessageJob.queue(queue_name, :id => self.id)
+    UnqueueMessageJob.queue(queue_name, id: id)
   end
 
   def queue!
@@ -56,13 +56,13 @@ class QueuedMessage < ApplicationRecord
   end
 
   def send_bounce
-    if self.message.send_bounces?
-      Postal::BounceMessage.new(self.server, self.message).queue
+    if message.send_bounces?
+      Postal::BounceMessage.new(server, message).queue
     end
   end
 
   def allocate_ip_address
-    if Postal.ip_pools? && self.message && pool = self.server.ip_pool_for_message(self.message)
+    if Postal.ip_pools? && message && pool = server.ip_pool_for_message(message)
       self.ip_address = pool.ip_addresses.select_by_priority
     end
   end
@@ -70,7 +70,7 @@ class QueuedMessage < ApplicationRecord
   def acquire_lock
     time = Time.now
     locker = Postal.locker_name
-    rows = self.class.where(:id => self.id, :locked_by => nil, :locked_at => nil).update_all(:locked_by => locker, :locked_at => time)
+    rows = self.class.where(id: id, locked_by: nil, locked_at: nil).update_all(locked_by: locker, locked_at: time)
     if rows == 1
       self.locked_by = locker
       self.locked_at = time
@@ -81,20 +81,20 @@ class QueuedMessage < ApplicationRecord
   end
 
   def retry_later(time = nil)
-    retry_time = time || self.class.calculate_retry_time(self.attempts, 5.minutes)
+    retry_time = time || self.class.calculate_retry_time(attempts, 5.minutes)
     self.locked_by = nil
     self.locked_at = nil
-    update_columns(:locked_by => nil, :locked_at => nil, :retry_after => Time.now + retry_time, :attempts => self.attempts + 1)
+    update_columns(locked_by: nil, locked_at: nil, retry_after: Time.now + retry_time, attempts: attempts + 1)
   end
 
   def unlock
     self.locked_by = nil
     self.locked_at = nil
-    update_columns(:locked_by => nil, :locked_at => nil)
+    update_columns(locked_by: nil, locked_at: nil)
   end
 
   def self.calculate_retry_time(attempts, initial_period)
-    (1.3 ** attempts) * initial_period
+    (1.3**attempts) * initial_period
   end
 
   def locked?
@@ -105,13 +105,14 @@ class QueuedMessage < ApplicationRecord
     unless locked?
       raise Postal::Error, "Must lock current message before locking any friends"
     end
-    if self.batch_key.nil?
+
+    if batch_key.nil?
       []
     else
       time = Time.now
       locker = Postal.locker_name
-      self.class.retriable.where(:batch_key => self.batch_key, :ip_address_id => self.ip_address_id, :locked_by => nil, :locked_at => nil).limit(limit).update_all(:locked_by => locker, :locked_at => time)
-      QueuedMessage.where(:batch_key => self.batch_key, :ip_address_id => self.ip_address_id, :locked_by => locker, :locked_at => time).where.not(id: self.id)
+      self.class.retriable.where(batch_key: batch_key, ip_address_id: ip_address_id, locked_by: nil, locked_at: nil).limit(limit).update_all(locked_by: locker, locked_at: time)
+      QueuedMessage.where(batch_key: batch_key, ip_address_id: ip_address_id, locked_by: locker, locked_at: time).where.not(id: id)
     end
   end
 

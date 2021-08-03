@@ -11,9 +11,9 @@ module Postal
 
     def to_hash
       {
-        :code => code,
-        :score => score,
-        :description => description
+        code: code,
+        score: score,
+        description: description
       }
     end
 

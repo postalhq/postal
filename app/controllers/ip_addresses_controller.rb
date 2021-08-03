@@ -13,7 +13,7 @@ class IPAddressesController < ApplicationController
     if @ip_address.save
       redirect_to_with_json [:edit, @ip_pool]
     else
-      render_form_errors 'new', @ip_address
+      render_form_errors "new", @ip_address
     end
   end
 
@@ -21,7 +21,7 @@ class IPAddressesController < ApplicationController
     if @ip_address.update(safe_params)
       redirect_to_with_json [:edit, @ip_pool]
     else
-      render_form_errors 'edit', @ip_address
+      render_form_errors "edit", @ip_address
     end
   end
 

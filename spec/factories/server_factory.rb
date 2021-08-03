@@ -40,7 +40,6 @@
 #
 
 FactoryBot.define do
-
   factory :server do
     association :organization
     name { "Mail Server" }
@@ -48,5 +47,4 @@ FactoryBot.define do
     provision_database { false }
     sequence(:permalink) { |n| "server#{n}" }
   end
-
 end

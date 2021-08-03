@@ -25,14 +25,15 @@ module Postal
         if minutes > 60
           raise Postal::Error, "Live stats can only return data for the last 60 minutes."
         end
+
         options[:types] ||= [:incoming, :outgoing]
         if options[:types].empty?
           raise Postal::Error, "You must provide at least one type to return"
         else
           time = minutes.minutes.ago.beginning_of_minute.utc.to_f
-          types = options[:types].map {|t| "#{@database.escape(t.to_s)}"}.join(', ')
+          types = options[:types].map { |t| "#{@database.escape(t.to_s)}" }.join(", ")
           result = @database.query("SELECT SUM(count) as count FROM `#{@database.database_name}`.`live_stats` WHERE `type` IN (#{types}) AND timestamp > #{time}").first
-          result['count'] || 0
+          result["count"] || 0
         end
       end
 

@@ -19,7 +19,7 @@ class AddressEndpointsController < ApplicationController
       flash[:notice] = params[:return_notice] if params[:return_notice].present?
       redirect_to_with_json [:return_to, [organization, @server, :address_endpoints]]
     else
-      render_form_errors 'new', @address_endpoint
+      render_form_errors "new", @address_endpoint
     end
   end
 
@@ -27,7 +27,7 @@ class AddressEndpointsController < ApplicationController
     if @address_endpoint.update(safe_params)
       redirect_to_with_json [organization, @server, :address_endpoints]
     else
-      render_form_errors 'edit', @address_endpoint
+      render_form_errors "edit", @address_endpoint
     end
   end
 

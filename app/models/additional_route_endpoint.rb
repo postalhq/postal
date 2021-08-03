@@ -13,19 +13,20 @@
 class AdditionalRouteEndpoint < ApplicationRecord
 
   belongs_to :route
-  belongs_to :endpoint, :polymorphic => true
+  belongs_to :endpoint, polymorphic: true
 
   validate :validate_endpoint_belongs_to_server
   validate :validate_wildcard
   validate :validate_uniqueness
 
   def self.find_by_endpoint(endpoint)
-    class_name, id = endpoint.split('#', 2)
+    class_name, id = endpoint.split("#", 2)
     unless Route::ENDPOINT_TYPES.include?(class_name)
       raise Postal::Error, "Invalid endpoint class name '#{class_name}'"
     end
+
     if uuid = class_name.constantize.find_by_uuid(id)
-      where(:endpoint_type => class_name, :endpoint_id => uuid).first
+      where(endpoint_type: class_name, endpoint_id: uuid).first
     else
       nil
     end
@@ -40,10 +41,11 @@ class AdditionalRouteEndpoint < ApplicationRecord
       self.endpoint = nil
     else
       if value =~ /\#/
-        class_name, id = value.split('#', 2)
+        class_name, id = value.split("#", 2)
         unless Route::ENDPOINT_TYPES.include?(class_name)
           raise Postal::Error, "Invalid endpoint class name '#{class_name}'"
         end
+
         self.endpoint = class_name.constantize.find_by_uuid(id)
       else
         self.endpoint = nil
@@ -54,20 +56,20 @@ class AdditionalRouteEndpoint < ApplicationRecord
   private
 
   def validate_endpoint_belongs_to_server
-    if self.endpoint && self.endpoint&.server != self.route.server
+    if endpoint && endpoint&.server != route.server
       errors.add :endpoint, :invalid
     end
   end
 
   def validate_uniqueness
-    if self.endpoint == self.route.endpoint
+    if endpoint == route.endpoint
       errors.add :base, "You can only add an endpoint to a route once"
     end
   end
 
   def validate_wildcard
-    if self.route.wildcard?
-      if self.endpoint_type == 'SMTPEndpoint' || self.endpoint_type == 'AddressEndpoint'
+    if route.wildcard?
+      if endpoint_type == "SMTPEndpoint" || endpoint_type == "AddressEndpoint"
         errors.add :base, "SMTP or address endpoints are not permitted on wildcard routes"
       end
     end

@@ -1,4 +1,4 @@
-require 'net/http'
+require "net/http"
 
 module Postal
   module MessageInspectors
@@ -10,12 +10,12 @@ module Postal
       def inspect_message(inspection)
         response = request(inspection.message, inspection.scope)
         response = JSON.parse(response.body)
-        return unless response['symbols'].is_a?(Hash)
+        return unless response["symbols"].is_a?(Hash)
 
-        response['symbols'].values.each do |symbol|
-          next if symbol['description'].blank?
+        response["symbols"].values.each do |symbol|
+          next if symbol["description"].blank?
 
-          inspection.spam_checks << SpamCheck.new(symbol['name'], symbol['score'], symbol['description'])
+          inspection.spam_checks << SpamCheck.new(symbol["name"], symbol["score"], symbol["description"])
         end
       rescue Error => e
         inspection.spam_checks << SpamCheck.new("ERROR", 0, e.message)
@@ -31,24 +31,24 @@ module Postal
 
         raw_message = message.raw_message
 
-        request = Net::HTTP::Post.new('/checkv2')
+        request = Net::HTTP::Post.new("/checkv2")
         request.body = raw_message
-        request['Content-Length'] = raw_message.bytesize.to_s
-        request['Password'] = @config.password if @config.password
-        request['Flags'] = @config.flags if @config.flags
-        request['User-Agent'] = 'Postal'
-        request['Deliver-To'] = message.rcpt_to
-        request['From'] = message.mail_from
-        request['Rcpt'] = message.rcpt_to
-        request['Queue-Id'] = message.token
+        request["Content-Length"] = raw_message.bytesize.to_s
+        request["Password"] = @config.password if @config.password
+        request["Flags"] = @config.flags if @config.flags
+        request["User-Agent"] = "Postal"
+        request["Deliver-To"] = message.rcpt_to
+        request["From"] = message.mail_from
+        request["Rcpt"] = message.rcpt_to
+        request["Queue-Id"] = message.token
 
         if scope == :outgoing
-          request['User'] = ''
+          request["User"] = ""
           # We don't actually know the IP but an empty input here will
           # still trigger rspamd to treat this as an outbound email
           # and disable certain checks.
           # https://rspamd.com/doc/tutorials/scanning_outbound.html
-          request['Ip'] = ''
+          request["Ip"] = ""
         end
 
         response = nil
@@ -56,7 +56,7 @@ module Postal
           response = http.request(request)
         rescue Exception => e
           logger.error "Error talking to rspamd: #{e.class} (#{e.message})"
-          logger.error e.backtrace[0,5]
+          logger.error e.backtrace[0, 5]
 
           raise Error, "Error when scanning with rspamd (#{e.class})"
         end

@@ -23,7 +23,7 @@ module Postal
 
       def resolve(domain)
         Resolv::DNS.open do |dns|
-          dns.timeouts = [10,5]
+          dns.timeouts = [10, 5]
           dns.getresources(domain, Resolv::DNS::Resource::IN::MX).map { |m| [m.preference.to_i, m.exchange.to_s] }
         end
       end

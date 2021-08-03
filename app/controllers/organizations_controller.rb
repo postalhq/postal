@@ -1,6 +1,6 @@
 class OrganizationsController < ApplicationController
 
-  before_action :admin_required, :only => [:new, :create, :delete, :destroy]
+  before_action :admin_required, only: [:new, :create, :delete, :destroy]
 
   def index
     if current_user.admin?
@@ -23,7 +23,7 @@ class OrganizationsController < ApplicationController
     if @organization.save
       redirect_to_with_json organization_root_path(@organization)
     else
-      render_form_errors 'new', @organization
+      render_form_errors "new", @organization
     end
   end
 
@@ -34,23 +34,23 @@ class OrganizationsController < ApplicationController
   def update
     @organization_obj = current_user.organizations_scope.find(organization.id)
     if @organization_obj.update(params.require(:organization).permit(:name, :time_zone))
-      redirect_to_with_json organization_settings_path(@organization_obj), :notice => "Settings for #{@organization_obj.name} have been saved successfully."
+      redirect_to_with_json organization_settings_path(@organization_obj), notice: "Settings for #{@organization_obj.name} have been saved successfully."
     else
-      render_form_errors 'edit', @organization_obj
+      render_form_errors "edit", @organization_obj
     end
   end
 
   def destroy
     unless current_user.authenticate(params[:password])
       respond_to do |wants|
-        wants.html { redirect_to organization_delete_path(@organization), :alert => "The password you entered was not valid. Please check and try again." }
-        wants.json { render :json => {:alert => "The password you entered was invalid. Please check and try again."} }
+        wants.html { redirect_to organization_delete_path(@organization), alert: "The password you entered was not valid. Please check and try again." }
+        wants.json { render json: { alert: "The password you entered was invalid. Please check and try again." } }
       end
       return
     end
 
     organization.soft_destroy
-    redirect_to_with_json root_path(:nrd => 1), :notice => "#{@organization.name} has been removed successfully."
+    redirect_to_with_json root_path(nrd: 1), notice: "#{@organization.name} has been removed successfully."
   end
 
   private

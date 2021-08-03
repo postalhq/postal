@@ -17,11 +17,11 @@ module Postal
     end
 
     class << self
+
       # Return an array of all inspectors that are available for this
       # installation.
       def inspectors
         Array.new.tap do |inspectors|
-
           if Postal.config.rspamd&.enabled
             inspectors << MessageInspectors::Rspamd.new(Postal.config.rspamd)
           elsif Postal.config.spamd&.enabled
@@ -31,9 +31,9 @@ module Postal
           if Postal.config.clamav&.enabled
             inspectors << MessageInspectors::Clamav.new(Postal.config.clamav)
           end
-
         end
       end
+
     end
 
   end

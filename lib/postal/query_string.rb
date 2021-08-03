@@ -14,7 +14,7 @@ module Postal
     end
 
     def to_hash
-      @hash ||= @string.scan(/([a-z]+)\:\s*(?:(\d{2,4}\-\d{2}-\d{2}\s\d{2}\:\d{2})|\"(.*?)\"|(.*?))(\s|\z)/).each_with_object({}) do |(key, date, string_with_spaces, value), hash|
+      @to_hash ||= @string.scan(/([a-z]+):\s*(?:(\d{2,4}-\d{2}-\d{2}\s\d{2}:\d{2})|"(.*?)"|(.*?))(\s|\z)/).each_with_object({}) do |(key, date, string_with_spaces, value), hash|
         if date
           actual_value = date
         elsif string_with_spaces

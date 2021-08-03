@@ -1,9 +1,9 @@
 module ApplicationHelper
 
   def format_delivery_details(server, text)
-    text.gsub!(/\<msg\:(\d+)\>/) do
+    text.gsub!(/<msg:(\d+)>/) do
       id = $1.to_i
-      link_to("message ##{id}", organization_server_message_path(server.organization, server, id), :class => "u-link")
+      link_to("message ##{id}", organization_server_message_path(server.organization, server, id), class: "u-link")
     end
     text.html_safe
   end
@@ -22,14 +22,14 @@ module ApplicationHelper
     style
   end
 
-  def domain_options_for_select(server, selected_domain = nil, options = {})
+  def domain_options_for_select(server, selected_domain = nil, _options = {})
     String.new.tap do |s|
       s << "<option></option>"
       server_domains = server.domains.verified.order(:name)
       unless server_domains.empty?
         s << "<optgroup label='Server Domains'>"
         for domain in server_domains
-          selected = domain == selected_domain ? "selected='selected'" : ''
+          selected = domain == selected_domain ? "selected='selected'" : ""
           s << "<option value='#{domain.id}' #{selected}>#{domain.name}</option>"
         end
         s << "</optgroup>"
@@ -39,12 +39,11 @@ module ApplicationHelper
       unless organization_domains.empty?
         s << "<optgroup label='Organization Domains'>"
         for domain in organization_domains
-          selected = domain == selected_domain ? "selected='selected'" : ''
+          selected = domain == selected_domain ? "selected='selected'" : ""
           s << "<option value='#{domain.id}' #{selected}>#{domain.name}</option>"
         end
         s << "</optgroup>"
       end
-
     end.html_safe
   end
 
@@ -57,19 +56,18 @@ module ApplicationHelper
         s << "<optgroup label='HTTP Endpoints'>"
         for endpoint in http_endpoints
           value = "#{endpoint.class}##{endpoint.uuid}"
-          selected = value == selected_value ? "selected='selected'" : ''
+          selected = value == selected_value ? "selected='selected'" : ""
           s << "<option value='#{value}' #{selected}>#{endpoint.description}</option>"
         end
         s << "</optgroup>"
       end
-
 
       smtp_endpoints = server.smtp_endpoints.order(:name).to_a
       if smtp_endpoints.present?
         s << "<optgroup label='SMTP Endpoints'>"
         for endpoint in smtp_endpoints
           value = "#{endpoint.class}##{endpoint.uuid}"
-          selected = value == selected_value ? "selected='selected'" : ''
+          selected = value == selected_value ? "selected='selected'" : ""
           s << "<option value='#{value}' #{selected}>#{endpoint.description}</option>"
         end
         s << "</optgroup>"
@@ -80,7 +78,7 @@ module ApplicationHelper
         s << "<optgroup label='Address Endpoints'>"
         for endpoint in address_endpoints
           value = "#{endpoint.class}##{endpoint.uuid}"
-          selected = value == selected_value ? "selected='selected'" : ''
+          selected = value == selected_value ? "selected='selected'" : ""
           s << "<option value='#{value}' #{selected}>#{endpoint.address}</option>"
         end
         s << "</optgroup>"
@@ -89,14 +87,14 @@ module ApplicationHelper
       unless options[:other] == false
         s << "<optgroup label='Other Options'>"
         Route::MODES.each do |mode|
-          next if mode == 'Endpoint'
-          selected = (selected_value == mode ? "selected='selected'" : '')
+          next if mode == "Endpoint"
+
+          selected = (selected_value == mode ? "selected='selected'" : "")
           text = t("route_modes.#{mode.underscore}")
           s << "<option value='#{mode}' #{selected}>#{text}</option>"
         end
         s << "</optgroup>"
       end
-
     end.html_safe
   end
 

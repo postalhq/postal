@@ -1,4 +1,4 @@
-require 'resolv'
+require "resolv"
 
 class OutgoingMessagePrototype
 
@@ -49,25 +49,25 @@ class OutgoingMessagePrototype
   end
 
   def find_domain
-    @domain ||= begin
-      domain = @server.authenticated_domain_for_address(@from)
-      if @server.allow_sender? && domain.nil?
-        domain = @server.authenticated_domain_for_address(@sender)
-      end
-      domain || :none
+    return @domain if @domain
+
+    domain = @server.authenticated_domain_for_address(@from)
+    if @server.allow_sender? && domain.nil?
+      domain = @server.authenticated_domain_for_address(@sender)
     end
+    domain || :none
   end
 
   def to_addresses
-    @to.is_a?(String) ? @to.to_s.split(/\,\s*/) : @to.to_a
+    @to.is_a?(String) ? @to.to_s.split(/,\s*/) : @to.to_a
   end
 
   def cc_addresses
-    @cc.is_a?(String) ? @cc.to_s.split(/\,\s*/) : @cc.to_a
+    @cc.is_a?(String) ? @cc.to_s.split(/,\s*/) : @cc.to_a
   end
 
   def bcc_addresses
-    @bcc.is_a?(String) ? @bcc.to_s.split(/\,\s*/) : @bcc.to_a
+    @bcc.is_a?(String) ? @bcc.to_s.split(/,\s*/) : @bcc.to_a
   end
 
   def all_addresses
@@ -98,9 +98,9 @@ class OutgoingMessagePrototype
   def attachments
     (@attachments || []).map do |attachment|
       {
-        :name => attachment[:name],
-        :content_type => attachment[:content_type] || 'application/octet-stream',
-        :data => attachment[:base64] ? Base64.decode64(attachment[:data]) : attachment[:data]
+        name: attachment[:name],
+        content_type: attachment[:content_type] || "application/octet-stream",
+        data: attachment[:base64] ? Base64.decode64(attachment[:data]) : attachment[:data]
       }
     end
   end
@@ -113,15 +113,15 @@ class OutgoingMessagePrototype
     end
 
     if to_addresses.size > 50
-      @errors << 'TooManyToAddresses'
+      @errors << "TooManyToAddresses"
     end
 
     if cc_addresses.size > 50
-      @errors << 'TooManyCCAddresses'
+      @errors << "TooManyCCAddresses"
     end
 
     if bcc_addresses.size > 50
-      @errors << 'TooManyBCCAddresses'
+      @errors << "TooManyBCCAddresses"
     end
 
     if @plain_body.blank? && @html_body.blank?
@@ -137,7 +137,7 @@ class OutgoingMessagePrototype
     end
 
     if attachments && !attachments.empty?
-      attachments.each_with_index do |attachment, index|
+      attachments.each do |attachment|
         if attachment[:name].blank?
           @errors << "AttachmentMissingName" unless @errors.include?("AttachmentMissingName")
         elsif attachment[:data].blank?
@@ -154,8 +154,8 @@ class OutgoingMessagePrototype
       if @custom_headers.is_a?(Hash)
         @custom_headers.each { |key, value| mail[key.to_s] = value.to_s }
       end
-      mail.to = self.to_addresses.join(', ') if self.to_addresses.present?
-      mail.cc = self.cc_addresses.join(', ') if self.cc_addresses.present?
+      mail.to = to_addresses.join(", ") if to_addresses.present?
+      mail.cc = cc_addresses.join(", ") if cc_addresses.present?
       mail.from = @from
       mail.sender = @sender
       mail.subject = @subject
@@ -175,11 +175,11 @@ class OutgoingMessagePrototype
       end
       attachments.each do |attachment|
         mail.attachments[attachment[:name]] = {
-          :mime_type => attachment[:content_type],
-          :content => attachment[:data]
+          mime_type: attachment[:content_type],
+          content: attachment[:data]
         }
       end
-      mail.header['Received'] = "from #{@source_type} (#{self.resolved_hostname} [#{@ip}]) by Postal with HTTP; #{Time.now.utc.rfc2822.to_s}"
+      mail.header["Received"] = "from #{@source_type} (#{resolved_hostname} [#{@ip}]) by Postal with HTTP; #{Time.now.utc.rfc2822.to_s}"
       mail.message_id = "<#{@message_id}>"
       mail.to_s
     end
@@ -187,17 +187,17 @@ class OutgoingMessagePrototype
 
   def create_message(address)
     message = @server.message_db.new_message
-    message.scope = 'outgoing'
+    message.scope = "outgoing"
     message.rcpt_to = address
-    message.mail_from = self.from_address
-    message.domain_id = self.domain.id
-    message.raw_message = self.raw_message
-    message.tag = self.tag
-    message.credential_id = self.credential&.id
+    message.mail_from = from_address
+    message.domain_id = domain.id
+    message.raw_message = raw_message
+    message.tag = tag
+    message.credential_id = credential&.id
     message.received_with_ssl = true
     message.bounce = @bounce ? 1 : 0
     message.save
-    {:id => message.id, :token => message.token}
+    { id: message.id, token: message.token }
   end
 
   def resolved_hostname

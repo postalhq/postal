@@ -1,7 +1,6 @@
-require 'rails_helper'
+require "rails_helper"
 
 describe Organization do
-
   context "model" do
     subject(:organization) { create(:organization) }
 
@@ -10,5 +9,4 @@ describe Organization do
       expect(organization.uuid.length).to eq 36
     end
   end
-
 end

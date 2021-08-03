@@ -19,15 +19,13 @@
 #
 
 FactoryBot.define do
-
   factory :track_domain do
     name { "click" }
-    dns_status { 'OK' }
+    dns_status { "OK" }
     association :server
 
     after(:build) do |track_domain|
-      track_domain.domain ||= create(:domain, :owner => track_domain.server)
+      track_domain.domain ||= create(:domain, owner: track_domain.server)
     end
   end
-
 end

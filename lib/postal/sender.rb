@@ -1,5 +1,6 @@
 module Postal
   class Sender
+
     def start
     end
 
@@ -8,5 +9,6 @@ module Postal
 
     def finish
     end
+
   end
 end

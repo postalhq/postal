@@ -18,7 +18,7 @@ class CredentialsController < ApplicationController
     if @credential.save
       redirect_to_with_json [organization, @server, :credentials]
     else
-      render_form_errors 'new', @credential
+      render_form_errors "new", @credential
     end
   end
 
@@ -26,7 +26,7 @@ class CredentialsController < ApplicationController
     if @credential.update(params.require(:credential).permit(:name, :key, :hold))
       redirect_to_with_json [organization, @server, :credentials]
     else
-      render_form_errors 'edit', @credential
+      render_form_errors "edit", @credential
     end
   end
 

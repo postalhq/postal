@@ -31,11 +31,13 @@ module Postal
     end
 
     class << self
+
       def scan(message, scope)
         inspection = new(message, scope)
         inspection.scan
         inspection
       end
+
     end
 
   end

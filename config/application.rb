@@ -1,4 +1,4 @@
-require_relative 'boot'
+require_relative "boot"
 
 require "rails"
 require "active_model/railtie"
@@ -14,6 +14,7 @@ Bundler.require(*Rails.groups)
 
 module Postal
   class Application < Rails::Application
+
     # Disable most generators
     config.generators do |g|
       g.orm             :active_record
@@ -27,10 +28,11 @@ module Postal
     config.eager_load_namespaces << Postal
 
     # Disable field_with_errors
-    config.action_view.field_error_proc = Proc.new { |t, i| t }
+    config.action_view.field_error_proc = Proc.new { |t, _| t }
 
     # Load the tracking server middleware
-    require 'postal/tracking_middleware'
+    require "postal/tracking_middleware"
     config.middleware.use Postal::TrackingMiddleware
+
   end
 end

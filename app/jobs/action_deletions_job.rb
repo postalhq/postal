@@ -1,4 +1,5 @@
 class ActionDeletionsJob < Postal::Job
+
   def perform
     Organization.deleted.each do |org|
       log "Permanently removing organization #{org.id} (#{org.permalink})"
@@ -10,4 +11,5 @@ class ActionDeletionsJob < Postal::Job
       server.destroy
     end
   end
+
 end

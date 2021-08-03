@@ -18,7 +18,7 @@ class RoutesController < ApplicationController
     if @route.save
       redirect_to_with_json [organization, @server, :routes]
     else
-      render_form_errors 'new', @route
+      render_form_errors "new", @route
     end
   end
 
@@ -26,7 +26,7 @@ class RoutesController < ApplicationController
     if @route.update(safe_params)
       redirect_to_with_json [organization, @server, :routes]
     else
-      render_form_errors 'edit', @route
+      render_form_errors "edit", @route
     end
   end
 
@@ -38,7 +38,7 @@ class RoutesController < ApplicationController
   private
 
   def safe_params
-    params.require(:route).permit(:name, :domain_id, :spam_mode, :_endpoint, :additional_route_endpoints_array => [])
+    params.require(:route).permit(:name, :domain_id, :spam_mode, :_endpoint, additional_route_endpoints_array: [])
   end
 
 end

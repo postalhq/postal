@@ -1,24 +1,29 @@
-require 'mail'
+require "mail"
 module Mail
+
   module Encodings
+
     # Handle windows-1258 as windows-1252 when decoding
     def Encodings.q_value_decode(str)
-      str = str.sub(/\=\?windows-?1258\?/i, '\=?windows-1252?')
+      str = str.sub(/=\?windows-?1258\?/i, '\=?windows-1252?')
       RubyVer.q_value_decode(str)
     end
+
     def Encodings.b_value_decode(str)
-      str = str.sub(/\=\?windows-?1258\?/i, '\=?windows-1252?')
+      str = str.sub(/=\?windows-?1258\?/i, '\=?windows-1252?')
       RubyVer.b_value_decode(str)
     end
+
   end
 
   class Message
+
     ## Extract plain text body of message
     def plain_body
-      if self.multipart? and self.text_part
-        self.text_part.decoded
-      elsif self.mime_type == 'text/plain' || self.mime_type.nil?
-        self.decoded
+      if multipart? and text_part
+        text_part.decoded
+      elsif mime_type == "text/plain" || mime_type.nil?
+        decoded
       else
         nil
       end
@@ -26,10 +31,10 @@ module Mail
 
     ## Extract HTML text body of message
     def html_body
-      if self.multipart? and self.html_part
-        self.html_part.decoded
-      elsif self.mime_type == 'text/html'
-        self.decoded
+      if multipart? and html_part
+        html_part.decoded
+      elsif mime_type == "text/html"
+        decoded
       else
         nil
       end
@@ -56,8 +61,8 @@ module Mail
         filename = content_disp_name
       elsif content_location && content_loc_name
         filename = content_loc_name
-      elsif self.mime_type == "message/rfc822"
-        filename = "#{rand(100000000)}.eml"
+      elsif mime_type == "message/rfc822"
+        filename = "#{rand(100_000_000)}.eml"
       else
         filename = nil
       end
@@ -71,41 +76,50 @@ module Mail
 
     def decode_body_as_text
       body_text = decode_body
-      charset_tmp = Encoding.find(Ruby19.pick_encoding(charset)) rescue 'ASCII'
-      charset_tmp = 'Windows-1252' if charset_tmp.to_s =~ /windows-?1258/i
-      if charset_tmp == Encoding.find('UTF-7')
-        body_text.force_encoding('UTF-8')
-        decoded = body_text.gsub(/\+.*?\-/m) {|n|Base64.decode64(n[1..-2]+'===').force_encoding('UTF-16BE').encode('UTF-8')}
+      charset_tmp = Encoding.find(Ruby19.pick_encoding(charset)) rescue "ASCII"
+      charset_tmp = "Windows-1252" if charset_tmp.to_s =~ /windows-?1258/i
+      if charset_tmp == Encoding.find("UTF-7")
+        body_text.force_encoding("UTF-8")
+        decoded = body_text.gsub(/\+.*?-/m) { |n| Base64.decode64(n[1..-2] + "===").force_encoding("UTF-16BE").encode("UTF-8") }
       else
         body_text.force_encoding(charset_tmp)
-        decoded = body_text.encode("utf-8", :invalid => :replace, :undef => :replace)
+        decoded = body_text.encode("utf-8", invalid: :replace, undef: :replace)
       end
-      decoded.valid_encoding? ? decoded : decoded.encode("utf-16le", :invalid => :replace, :undef => :replace).encode("utf-8")
+      decoded.valid_encoding? ? decoded : decoded.encode("utf-16le", invalid: :replace, undef: :replace).encode("utf-8")
     end
+
   end
 
   # Handle attached emails as attachments
   class AttachmentsList < Array
+
     def initialize(parts_list)
       @parts_list = parts_list
-      @content_disposition_type = 'attachment'
+      @content_disposition_type = "attachment"
       parts_list.map { |p|
         (p.parts.empty? and p.attachment?) ? p : p.attachments
       }.flatten.compact.each { |a| self << a }
       self
     end
+
   end
+
 end
 
 class Array
+
   def decoded
-    return nil if self.empty?
-    return self.first.decoded
+    return nil if empty?
+
+    return first.decoded
   end
+
 end
 
 class NilClass
+
   def decoded
     nil
   end
+
 end
