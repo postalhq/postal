@@ -160,17 +160,15 @@ class OutgoingMessagePrototype
       mail.sender = @sender
       mail.subject = @subject
       mail.reply_to = @reply_to
-      if @html_body.blank? && attachments.empty?
-        mail.body = @plain_body
-      else
+      mail.part :content_type => "multipart/alternative" do |p|
         if !@plain_body.blank?
-          mail.text_part = Mail::Part.new
-          mail.text_part.body = @plain_body
+          p.text_part = Mail::Part.new
+          p.text_part.body = @plain_body
         end
         if !@html_body.blank?
-          mail.html_part = Mail::Part.new
-          mail.html_part.content_type = "text/html; charset=UTF-8"
-          mail.html_part.body = @html_body
+          p.html_part = Mail::Part.new
+          p.html_part.content_type = "text/html; charset=UTF-8"
+          p.html_part.body = @html_body
         end
       end
       attachments.each do |attachment|
