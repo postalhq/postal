@@ -17,6 +17,7 @@ general:
   use_local_ns_for_domains: false
   default_spam_threshold: 5.0
   default_spam_failure_threshold: 20.0
+  use_suppression_list: true
 
 web_server:
   bind_address: 127.0.0.1

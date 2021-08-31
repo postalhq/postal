@@ -59,10 +59,12 @@ class UnqueueMessageJob < Postal::Job
                   details += " Bounce sent to sender (see message <msg:#{bounce_id}>)"
                 end
               elsif queued_message.message.scope == 'outgoing'
-                # Add the recipient to the suppression list
-                if queued_message.server.message_db.suppression_list.add(:recipient, queued_message.message.rcpt_to, :reason => "too many soft fails")
-                  log "Added #{queued_message.message.rcpt_to} to suppression list because maximum attempts has been reached"
-                  details += " Added #{queued_message.message.rcpt_to} to suppression list because delivery has failed #{queued_message.attempts} times."
+                # Add the recipient to the suppression list if it is enabled
+                if Postal.config.general.use_suppression_list
+                  if queued_message.server.message_db.suppression_list.add(:recipient, queued_message.message.rcpt_to, :reason => "too many soft fails")
+                    log "Added #{queued_message.message.rcpt_to} to suppression list because maximum attempts has been reached"
+                    details += " Added #{queued_message.message.rcpt_to} to suppression list because delivery has failed #{queued_message.attempts} times."
+                  end
                 end
               end
               queued_message.message.create_delivery('HardFail', :details => details)
