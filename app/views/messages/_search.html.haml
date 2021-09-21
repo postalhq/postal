@@ -19,6 +19,9 @@
         %dt from: tom@example.com
         %dd Returns all mail sent from to the address provided.
       %dl.messageSearch__definition
+        %dt subject: "any string"
+        %dd Returns all mail which subject contains the substring provided.
+      %dl.messageSearch__definition
         %dt status: pending
         %dd Returns all messages with the status provided. The suitable statuses are: <code>pending</code>, <code>sent</code>, <code>held</code>, <code>softfail</code>, <code>hardfail</code> and <code>bounced</code>.
       %dl.messageSearch__definition

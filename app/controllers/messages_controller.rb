@@ -174,6 +174,12 @@
             options[:where].delete(:spam)
             options[:where].delete(:scope)
           end
+
+          if qs[:subject]
+            options[:where][:subject] = {}
+            options[:where][:subject][:like] = qs[:subject]
+          end
+
           options[:where][:tag] = qs[:tag] if qs[:tag]
           options[:where][:id] = qs[:id] if qs[:id]
           options[:where][:spam] = true if qs[:spam] == 'yes' || qs[:spam] == 'y'

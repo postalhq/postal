@@ -17,7 +17,8 @@ RUN apt-get update && \
   build-essential  \
   netcat \
   curl \
-  libmariadbclient-dev \
+  libmariadb-dev \
+  libcap2-bin \
   nano \
   nodejs
 
