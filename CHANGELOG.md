@@ -2,6 +2,13 @@
 
 This file contains all the latest changes and updates to Postal.
 
+## [3.3.5](https://github.com/postalserver/postal/compare/3.3.4...3.3.5) (2024-10-31)
+
+
+### Bug Fixes
+
+* typo in the credentials page ([fd3c7cc](https://github.com/postalserver/postal/commit/fd3c7ccdf6dc4ee0a76c9523cbd735159e4b8000))
+
 ## [3.3.4](https://github.com/postalserver/postal/compare/3.3.3...3.3.4) (2024-06-20)
 
 
