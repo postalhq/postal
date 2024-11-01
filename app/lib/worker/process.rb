@@ -202,7 +202,7 @@ module Worker
           logger.info "stopping tasks thread"
           ActiveRecord::Base.connection_pool.with_connection do
             if WorkerRole.release(:tasks)
-              logger.info "releasesd tasks role"
+              logger.info "released tasks role"
             end
           end
         end
