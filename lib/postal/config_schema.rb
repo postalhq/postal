@@ -101,6 +101,11 @@ module Postal
         description "When enabled queued messages will be de-queued in batches based on their destination"
         default true
       end
+
+      integer :batch_queued_messages_limit do
+        description "When de-queuing in batches, use this limit for the batch size"
+        default 100
+      end
     end
 
     group :web_server do

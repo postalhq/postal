@@ -33,6 +33,8 @@ postal:
   queued_message_lock_stale_days: 1
   # When enabled queued messages will be de-queued in batches based on their destination
   batch_queued_messages: true
+  # When de-queuing in batches, use this limit for the batch size
+  batch_queued_messages_limit: 100
 
 web_server:
   # The default port the web server should listen on unless overriden by the PORT environment variable
