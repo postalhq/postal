@@ -66,6 +66,11 @@ module Postal
         default true
       end
 
+      boolean :use_message_tags_for_bounces do
+        description "Use message tags when assigning bounces to their corresponding messages"
+        default false
+      end
+
       string :signing_key_path do
         description "Path to the private key used for signing"
         default "$config-file-root/signing.key"

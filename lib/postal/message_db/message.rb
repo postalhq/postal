@@ -499,7 +499,17 @@ module Postal
       def original_messages
         return nil unless bounce
 
-        other_message_ids = raw_message.scan(/\X-Postal-MsgID:\s*([a-z0-9]+)/i).flatten
+        # if this is enabled, we search first for the message tag as this is faster
+        # than to scan the full message (which is probably many mbytes in size)
+        if Postal::Config.postal.use_message_tags_for_bounces?
+          uname, domain = rcpt_to.split("@", 2)
+          uname, other_message_ids = uname.split("+", 2)
+        end
+        # if we did not found any messages, or this was not enabled, then fall back to
+        # the old header based search
+        if other_message_ids.nil? || other_message_ids.empty?
+          other_message_ids = raw_message.scan(/\X-Postal-MsgID:\s*([a-z0-9]+)/i).flatten
+        end
         if other_message_ids.empty?
           []
         else
