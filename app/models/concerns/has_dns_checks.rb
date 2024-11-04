@@ -73,18 +73,27 @@ module HasDNSChecks
 
   def check_dkim_record
     domain = "#{dkim_record_name}.#{name}"
+    check_dkim_record_recursive(domain, domain, 0)
+  end
+
+  def check_dkim_record_recursive(originaldomain, domain, level)
     records = resolver.txt(domain)
     if records.empty?
-      self.dkim_status = "Missing"
-      self.dkim_error = "No TXT records were returned for #{domain}"
+      records = resolver.cname(domain)
+      if (!records.empty? && records.size == 1 && level < 10)
+        return check_dkim_record_recursive(originaldomain, records.first, level+1)
+      else
+        self.dkim_status = "Missing"
+        self.dkim_error = "No TXT records were returned for #{originaldomain}"
+      end
     else
       sanitised_dkim_record = records.first.strip.ends_with?(";") ? records.first.strip : "#{records.first.strip};"
       if records.size > 1
         self.dkim_status = "Invalid"
-        self.dkim_error = "There are #{records.size} records for at #{domain}. There should only be one."
+        self.dkim_error = "There are #{records.size} records for at #{originaldomain}. There should only be one."
       elsif sanitised_dkim_record != dkim_record
         self.dkim_status = "Invalid"
-        self.dkim_error = "The DKIM record at #{domain} does not match the record we have provided. Please check it has been copied correctly."
+        self.dkim_error = "The DKIM record at #{originaldomain} does not match the record we have provided. Please check it has been copied correctly."
       else
         self.dkim_status = "OK"
         self.dkim_error = nil
