@@ -539,6 +539,11 @@ module Postal
         description "The OIDC issuer URL"
       end
 
+      boolean :pkce do
+        description "Option to enable Proof Key for Code Exchange by OAuth Public Clients"
+        default false
+      end
+
       string :identifier do
         description "The client ID for OIDC"
       end

@@ -233,6 +233,8 @@ oidc:
   name: OIDC Provider
   # The OIDC issuer URL
   issuer: 
+  # Set pkce option to true if OIDC provider has this option
+  pkce: 
   # The client ID for OIDC
   identifier: 
   # The client secret for OIDC

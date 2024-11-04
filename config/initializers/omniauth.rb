@@ -18,6 +18,7 @@ if config.enabled?
                               scope: config.scopes.map(&:to_sym),
                               uid_field: config.uid_field,
                               issuer: config.issuer,
+                              pkce: config.pkce?,
                               discovery: config.discovery?,
                               client_options: client_options
   end

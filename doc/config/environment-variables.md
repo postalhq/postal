@@ -103,6 +103,7 @@ This document contains all the environment variables which are available for thi
 | `OIDC_LOCAL_AUTHENTICATION_ENABLED` | Boolean | When enabled, users with passwords will still be able to login locally. If disable, only OpenID Connect will be available. | true |
 | `OIDC_NAME` | String | The name of the OIDC provider as shown in the UI | OIDC Provider |
 | `OIDC_ISSUER` | String | The OIDC issuer URL |  |
+| `OIDC_PKCE` | Boolean | Option to enable Proof Key for Code Exchange by OAuth Public Clients | false |
 | `OIDC_IDENTIFIER` | String | The client ID for OIDC |  |
 | `OIDC_SECRET` | String | The client secret for OIDC |  |
 | `OIDC_SCOPES` | Array of strings | Scopes to request from the OIDC server. | openid,email |
