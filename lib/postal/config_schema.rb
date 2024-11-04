@@ -413,6 +413,11 @@ module Postal
         description "The e-mail to use as the from address outgoing emails from Postal"
         default "postal@example.com"
       end
+
+      boolean :disable_ipv6 do
+        description "Disalbles sending emails via IPv6, only IPv4 will be used"
+        default false
+      end
     end
 
     group :rails do
