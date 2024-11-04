@@ -66,6 +66,11 @@ module Postal
         default true
       end
 
+      integer :default_dkim_key_size do
+        description "The default size for new DKIM keys"
+        default 1024
+      end
+
       string :signing_key_path do
         description "Path to the private key used for signing"
         default "$config-file-root/signing.key"

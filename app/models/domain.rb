@@ -82,7 +82,7 @@ class Domain < ApplicationRecord
   end
 
   def generate_dkim_key
-    self.dkim_private_key = OpenSSL::PKey::RSA.new(1024).to_s
+    self.dkim_private_key = OpenSSL::PKey::RSA.new(Postal::Config.postal.default_dkim_key_size).to_s
   end
 
   def dkim_key

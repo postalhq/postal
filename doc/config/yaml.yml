@@ -23,6 +23,8 @@ postal:
   use_local_ns_for_domain_verification: false
   # Append a Resend-Sender header to all outgoing e-mails
   use_resent_sender_header: true
+  # The default size for new DKIM keys
+  default_dkim_key_size: 1024
   # Path to the private key used for signing
   signing_key_path: $config-file-root/signing.key
   # An array of SMTP relays in the format of smtp://host:port
