@@ -12,6 +12,7 @@ class SessionsController < ApplicationController
     flash[:remember_login] = true
     redirect_to_with_return_to root_path
   rescue Postal::Errors::AuthenticationError
+    Postal.logger.error "Invalid credentials for #{request.remote_ip}", component: "postal-web"
     flash.now[:alert] = "The credentials you've provided are incorrect. Please check and try again."
     render "new"
   end
