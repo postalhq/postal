@@ -58,7 +58,7 @@ module Postal
           unless silence_config_messages
             warn "WARNING: Using legacy config file format. Upgrade your postal.yml to use"
             warn "version 2 of the Postal configuration or configure using environment"
-            warn "variables. See https://postalserver.io/config-v2 for details."
+            warn "variables. See https://docs.postalserver.io/config-v2 for details."
           end
           sources << LegacyConfigSource.new(yaml)
         when 2
