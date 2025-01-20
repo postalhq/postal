@@ -52,10 +52,10 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - run: docker-compose pull
+      - run: docker compose pull
         env:
           POSTAL_IMAGE: ghcr.io/postalserver/postal:ci-${{ github.sha }}
-      - run: docker-compose run postal sh -c 'bundle exec rspec'
+      - run: docker compose run postal sh -c 'bundle exec rspec'
         env:
           POSTAL_IMAGE: ghcr.io/postalserver/postal:ci-${{ github.sha }}
 

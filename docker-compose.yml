@@ -1,4 +1,3 @@
-version: "3"
 services:
   postal:
     image: ${POSTAL_IMAGE}
