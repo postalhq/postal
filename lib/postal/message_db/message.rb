@@ -446,7 +446,8 @@ module Postal
           subject: subject,
           timestamp: timestamp.to_f,
           spam_status: spam_status,
-          tag: tag
+          tag: tag,
+          headers: headers
         }
       end
 
