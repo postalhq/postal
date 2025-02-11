@@ -25,7 +25,7 @@ postal:
   use_resent_sender_header: true
   # Path to the private key used for signing
   signing_key_path: $config-file-root/signing.key
-  # An array of SMTP relays in the format of smtp://host:port
+  # An array of strings of SMTP relays in the format of 'smtp://host:port' where host has to be a FQDN/Hostname. IP address are not possible and will fail (silently).
   smtp_relays: []
   # An array of IP addresses to trust for proxying requests to Postal (in addition to localhost addresses)
   trusted_proxies: []
