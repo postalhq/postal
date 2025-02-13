@@ -242,7 +242,7 @@ GEM
     puma (6.4.2)
       nio4r (~> 2.0)
     racc (1.7.3)
-    rack (2.2.8.1)
+    rack (2.2.11)
     rack-oauth2 (2.2.1)
       activesupport
       attr_required
